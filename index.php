@@ -14,27 +14,25 @@
     define('USERNAME','tn76');
     define('PASSWORD','DblDTPzb');
     define('DBNAME','tn76');
-
-    try {
-        $conn = new PDO('mysql:host=' . SERVERNAME . ';dbname=' . DBNAME, USERNAME, PASSWORD);   //try statement to test database connection
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        echo "Connected successfully" . "</br>";
-
-        $stmt = $conn->prepare("select * from accounts where id < 6;");                    //Preparing SQL statement with DB connection
-        $stmt->execute();   
-        $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
-        $result = $stmt->fetchAll();
-        echo "No. of records is " . $stmt->rowCount() . "<br>";                    //Display no. of rows returned by the fired SQL query
-
-        htmlTags::tableFormat();                                                    //Display data in a tabular format - htmlTags class called for table tags
-        foreach ($result as $data) {
-            foreach ($data as $value) {
-                htmlTags::tableContent($value);                                      
+    
+    class dbConn {
+        protected static $conn;
+        public function __construct() {
+            try {
+                self::$conn = new PDO('mysql:host=' . SERVERNAME . ';dbname=' . DBNAME, USERNAME, PASSWORD);   //try statement to test database connection
+                self::$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                echo "Connected successfully" . "</br>";
             }
-            htmlTags::breakTableRow();
+            catch (PDOException $e) {                                                       //catch statement to handle any exception
+                echo "Connection failed: " . $e->getMessage() . "</br>";
+            }
+        }
+        static public function getConnection() {
+            if (!self::$conn) {
+                new dbConn;
+            }
+            return self::$conn;
         }
     }
-    catch (PDOException $e) {                                                       //catch statement to handle any exception
-        echo "Connection failed: " . $e->getMessage() . "</br>";
-    }
+    $table = DisplayTable::getData();
 ?>
